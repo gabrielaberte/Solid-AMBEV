@@ -10,40 +10,35 @@
             this.livros = new List<Livro>();
             this.registrosEmprestimo = new Dictionary<string, RegistroEmprestimo>();
         }
+    }
 
+    public class BibliotecaRepository
+    {
         // Métodos relacionados ao gerenciamento de livros
         public void AdicionarLivro(Livro livro)
         {
-            livros.Add(livro);
+            //livros.Add(livro);
         }
 
         public void RemoverLivro(Livro livro)
         {
-            livros.Remove(livro);
+            //livros.Remove(livro);
         }
 
-        public List<Livro> ObterLivros()
+        public void ObterLivros()
         {
-            return livros;
+            //return livros;
         }
 
-        // Métodos relacionados ao empréstimo de livros
-        public void EmprestarLivro(string usuarioId, Livro livro)
+        // Métodos relacionados ao armazenamento em banco de dados
+        public void SalvarDadosBiblioteca()
         {
-            if (livros.Contains(livro))
-            {
-                registrosEmprestimo[usuarioId] = new RegistroEmprestimo(usuarioId, livro, DateTime.Now);
-                livros.Remove(livro);
-            }
+            // Código para salvar dados da biblioteca no banco de dados
         }
 
-        public void DevolverLivro(string usuarioId, Livro livro)
+        public void CarregarDadosBiblioteca()
         {
-            if (registrosEmprestimo.TryGetValue(usuarioId, out var registro) && registro.Livro.Equals(livro))
-            {
-                livros.Add(livro);
-                registrosEmprestimo.Remove(usuarioId);
-            }
+            // Código para carregar dados da biblioteca do banco de dados
         }
 
         // Métodos relacionados ao cálculo de multas
@@ -78,6 +73,37 @@
         }
     }
 
+    public class CalculoMultas
+    {
+        // Métodos relacionados ao cálculo de multas
+        public double CalcularMulta(string usuarioId)
+        {
+            if (registrosEmprestimo.TryGetValue(usuarioId, out var registro))
+            {
+                var diasEmprestados = (DateTime.Now - registro.DataEmprestimo).TotalDays;
+                if (diasEmprestados > 14)
+                {
+                    return (diasEmprestados - 14) * 0.5;
+                }
+            }
+            return 0.0;
+        }
+
+        // Métodos relacionados à geração de relatórios
+        public void GerarRelatorio()
+        {
+            // Código para gerar relatório de status da biblioteca
+        }
+    }
+
+    public class Relatorio
+    {
+        // Métodos relacionados à geração de relatórios
+        public void GerarRelatorio()
+        {
+            // Código para gerar relatório de status da biblioteca
+        }
+    }
     public class Livro
     {
         public string Titulo { get; set; }
@@ -89,13 +115,34 @@
         public string UsuarioId { get; }
         public Livro Livro { get; }
         public DateTime DataEmprestimo { get; }
+        public DateTime? DataDevolucao { get; }
 
+        private List<Livro> livros;
         public RegistroEmprestimo(string usuarioId, Livro livro, DateTime dataEmprestimo)
         {
             UsuarioId = usuarioId;
             Livro = livro;
             DataEmprestimo = dataEmprestimo;
+            livros = livros.ToList();
+        }
+
+        // Métodos relacionados ao empréstimo de livros
+        public void EmprestarLivro(string usuarioId, Livro livro)
+        {
+            if (livros.Contains(livro))
+            {
+                registrosEmprestimo[usuarioId] = new RegistroEmprestimo(usuarioId, livro, DateTime.Now);
+                livros.Remove(livro);
+            }
+        }
+
+        public void DevolverLivro(string usuarioId, Livro livro)
+        {
+            if (registrosEmprestimo.TryGetValue(usuarioId, out var registro) && registro.Livro.Equals(livro))
+            {
+                livros.Add(livro);
+                registrosEmprestimo.Remove(usuarioId);
+            }
         }
     }
-
 }
